@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demo-sa
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: pod-reader
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["pods"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: list-pods_demo-sa
+  namespace: default
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: demo-sa
+    namespace: default
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memberlist-example
+spec:
+  selector:
+    matchLabels:
+      app: memberlist-example
+  template:
+    metadata:
+      labels:
+        app: memberlist-example
+    spec:
+      serviceAccountName: demo-sa
+      containers:
+        - name: memberlist-example
+          image: memberlist-example
+          env:
+            - name: DISCOVER_CFG
+              value: 'provider=k8s label_selector="app = memberlist-example"'
+          ports:
+            - containerPort: 7946
