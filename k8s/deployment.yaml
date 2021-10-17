@@ -15,7 +15,7 @@ rules:
     resources: ["pods"]
     verbs: ["get", "watch", "list"]
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: list-pods_demo-sa
@@ -35,6 +35,7 @@ kind: Deployment
 metadata:
   name: memberlist-example
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: memberlist-example
